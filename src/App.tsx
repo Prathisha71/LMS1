@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { useLmsStore } from './store/useLmsStore';
-import { DemoConsole } from './components/DemoConsole';
+import { useLmsStore } from './store/index';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { LandingPage } from './components/LandingPage';
@@ -12,10 +11,7 @@ import { QuizInterface } from './components/QuizInterface';
 import { AssignmentPage } from './components/AssignmentPage';
 import { StudentProfile } from './components/StudentProfile';
 import { TeacherDashboard } from './components/TeacherDashboard';
-import { ContentUpload } from './components/ContentUpload';
-import { QuizBuilder } from './components/QuizBuilder';
 import { AdminPortal } from './components/AdminPortal';
-import { AdvancedFeatures } from './components/AdvancedFeatures';
 
 import { useEffect } from 'react';
 
@@ -75,18 +71,9 @@ function App() {
         return <StudentProfile />;
       case 'teacher-dash':
         return <TeacherDashboard />;
-      case 'content-upload':
-        return <ContentUpload />;
-      case 'quiz-builder':
-        return <QuizBuilder />;
       case 'admin-structure':
       case 'admin-analytics':
         return <AdminPortal />;
-      case 'webrtc-live':
-      case 'ai-tutor':
-      case 'drm-security':
-      case 'parent-portal':
-        return <AdvancedFeatures />;
       default:
         return <StudentDashboard />;
     }
