@@ -13,6 +13,7 @@ import { AssignmentPage } from './components/AssignmentPage';
 import { StudentProfile } from './components/StudentProfile';
 import { TeacherDashboard } from './components/TeacherDashboard';
 import { AdminPortal } from './components/AdminPortal';
+import { AITutor } from './components/AITutor';
 
 function App() {
   const { activeView, isDarkMode, setView, profile, boards } = useLmsStore();
@@ -149,6 +150,8 @@ function App() {
       case 'admin-structure':
       case 'admin-analytics':
         return <AdminPortal />;
+      case 'ai-tutor':
+        return <AITutor />;
       default:
         return <StudentDashboard />;
     }

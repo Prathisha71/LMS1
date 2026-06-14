@@ -255,3 +255,29 @@ export const progressAPI = {
     return res.json();
   },
 };
+
+// ========================================
+// AI TUTOR ENDPOINTS
+// ========================================
+
+export const tutorAPI = {
+  askQuestion: async (
+    question: string,
+    history: Array<{ role: 'user' | 'model'; text: string }>
+  ) => {
+    const token = localStorage.getItem('auth_token');
+    const res = await fetch(`${API_BASE_URL}/tutor`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ question, history }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to contact AI Tutor');
+    }
+    return res.json();
+  },
+};

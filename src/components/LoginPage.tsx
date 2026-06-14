@@ -16,13 +16,10 @@ export const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const resolveEmail = () => {
-    const value = usernameOrEmail.trim().toLowerCase();
-    if (value.includes('@')) return value;
-    if (value === 'student') return 'student@eduverse.com';
-    if (value === 'teacher') return 'teacher@eduverse.com';
-    if (value === 'admin') return 'admin@eduverse.com';
-    if (role === 'student') return `${value}@eduverse.in`;
-    return value;
+    const value = usernameOrEmail.trim();
+    if (value.includes('@')) return value.toLowerCase();
+    if (role === 'student') return `${value.toLowerCase()}@eduverse.in`;
+    return value.toLowerCase();
   };
 
   const openStudentWorkspace = (profile: Profile) => {
@@ -53,8 +50,22 @@ export const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      const email = resolveEmail();
-      const result = await authAPI.login(email, password);
+      const loginEmails = getLoginEmails();
+      let result: Awaited<ReturnType<typeof authAPI.login>> | null = null;
+
+      for (const email of loginEmails) {
+        try {
+          result = await authAPI.login(email, password);
+          break;
+        } catch {
+          // Try the next supported student demo domain before falling back offline.
+        }
+      }
+
+      if (!result) {
+        throw new Error('Login failed');
+      }
+
       localStorage.setItem('auth_token', result.token);
 
       let boards = useLmsStore.getState().boards;

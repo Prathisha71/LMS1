@@ -85,13 +85,13 @@ async function ensurePostgresRunning(databaseUrl: string) {
   console.log('Starting embedded PostgreSQL in background...');
   startDetachedPostgres();
 
-  for (let attempt = 0; attempt < 30; attempt += 1) {
+  for (let attempt = 0; attempt < 90; attempt += 1) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     if (await canConnect(databaseUrl.replace('/lms_db', '/postgres'))) {
       break;
     }
-    if (attempt === 29) {
-      throw new Error('Timed out waiting for PostgreSQL to start');
+    if (attempt === 89) {
+      throw new Error('Timed out waiting for PostgreSQL to start after 90 seconds');
     }
   }
 
