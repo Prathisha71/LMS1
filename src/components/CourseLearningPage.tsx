@@ -3,6 +3,16 @@ import { generateQuiz } from '../utils/quizGenerator';
 import React, { useState, useRef, useEffect } from 'react';
 import { useLmsStore } from '../store/index';
 import type { Topic, Chapter, Subject } from '../store/types';
+
+const getSubjectColor = (title: string) => {
+  const t = title.toLowerCase();
+  if (t.includes('math')) return 'from-blue-500 to-blue-700';
+  if (t.includes('science') && !t.includes('social')) return 'from-purple-500 to-purple-700';
+  if (t.includes('social')) return 'from-orange-500 to-orange-700';
+  if (t.includes('english')) return 'from-rose-500 to-rose-700';
+  if (t.includes('tamil')) return 'from-emerald-500 to-emerald-700';
+  return 'from-slate-500 to-slate-700';
+};
 import { 
   Play, Pause, BookOpen, FileText, Bookmark, 
   CheckCircle, Plus, Trash2, ArrowRight, Star, Clock,
