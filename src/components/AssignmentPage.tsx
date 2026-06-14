@@ -30,12 +30,12 @@ export const AssignmentPage: React.FC = () => {
   }, [profile.selectedClassId, classAssignments]);
 
   const activeAssign = classAssignments.find(a => a.id === selectedAssignId) || classAssignments[0];
-  const isChemistry = activeAssign?.subjectId.includes('chem');
+  const isChemistry = activeAssign?.subjectTitle?.toLowerCase().includes('chemistry') || activeAssign?.subjectId?.toLowerCase().includes('chem');
   const subjectTagColor = isChemistry 
-    ? 'text-fuchsia-605 dark:text-fuchsia-400 font-extrabold' 
-    : 'text-sky-605 dark:text-sky-400 font-extrabold';
+    ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' 
+    : 'text-sky-600 dark:text-sky-400 font-extrabold';
   const subjectIconColor = isChemistry 
-    ? 'text-fuchsia-500 dark:text-fuchsia-400' 
+    ? 'text-emerald-500 dark:text-emerald-400' 
     : 'text-sky-500 dark:text-sky-400';
 
   const handleSimulatedUpload = () => {
@@ -97,7 +97,7 @@ export const AssignmentPage: React.FC = () => {
               <div className="p-3.5 rounded-none bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/5 flex items-center gap-2.5">
                 <Calendar className={`w-5 h-5 ${subjectIconColor}`} />
                 <div>
-                  <span className="text-[9px] text-slate-650 dark:text-slate-500 font-bold uppercase">Due Date</span>
+                  <span className="text-[9px] text-slate-600 dark:text-slate-500 font-bold uppercase">Due Date</span>
                   <p className="text-slate-800 dark:text-slate-200 font-semibold mt-0.5">{activeAssign.deadline}</p>
                 </div>
               </div>
@@ -105,7 +105,7 @@ export const AssignmentPage: React.FC = () => {
               <div className="p-3.5 rounded-none bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/5 flex items-center gap-2.5">
                 <FileText className={`w-5 h-5 ${subjectIconColor}`} />
                 <div>
-                  <span className="text-[9px] text-slate-650 dark:text-slate-500 font-bold uppercase">Total Points</span>
+                  <span className="text-[9px] text-slate-600 dark:text-slate-500 font-bold uppercase">Total Points</span>
                   <p className="text-slate-800 dark:text-slate-200 font-semibold mt-0.5">{activeAssign.points} Points Max</p>
                 </div>
               </div>
@@ -113,7 +113,7 @@ export const AssignmentPage: React.FC = () => {
 
             {/* Description */}
             <div className="space-y-2 text-slate-700 dark:text-slate-400 text-xs sm:text-sm leading-relaxed font-normal">
-              <h4 className="font-bold text-slate-905 dark:text-white text-xs uppercase tracking-wider">Instructions</h4>
+              <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider">Instructions</h4>
               <p>{activeAssign.description}</p>
             </div>
 
@@ -131,18 +131,18 @@ export const AssignmentPage: React.FC = () => {
                     {isUploading ? (
                       <div className="space-y-2">
                         <div className="w-8 h-8 rounded-full border-2 border-brand-royal border-t-transparent animate-spin mx-auto" />
-                        <span className="text-xs text-slate-705 dark:text-slate-400 block font-semibold">Uploading document to Cloudflare R2...</span>
+                        <span className="text-xs text-slate-700 dark:text-slate-400 block font-semibold">Uploading document to Cloudflare R2...</span>
                       </div>
                     ) : uploadSuccess ? (
                       <div className="space-y-2 text-emerald-600 dark:text-emerald-400">
                         <Check className="w-8 h-8 mx-auto" />
                         <span className="text-xs font-bold block">{uploadedFileName} ready</span>
-                        <span className="text-[10px] text-slate-655 dark:text-slate-550 block">Click Submit Assignment below to finalize.</span>
+                        <span className="text-[10px] text-slate-600 dark:text-slate-500 block">Click Submit Assignment below to finalize.</span>
                       </div>
                     ) : (
-                      <div className="space-y-2 text-slate-650 dark:text-slate-500">
+                      <div className="space-y-2 text-slate-600 dark:text-slate-500">
                         <Upload className="w-8 h-8 mx-auto text-brand-violet dark:text-brand-violet-light" />
-                        <span className="text-xs text-slate-805 dark:text-slate-300 font-bold block">Select or Drop files here</span>
+                        <span className="text-xs text-slate-800 dark:text-slate-300 font-bold block">Select or Drop files here</span>
                         <span className="text-[10px] block">PDF, DOCX formats supported (Max 15MB)</span>
                       </div>
                     )}
@@ -159,19 +159,19 @@ export const AssignmentPage: React.FC = () => {
                 </form>
               ) : (
                 <div className="p-4 rounded-none bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 space-y-2 text-xs">
-                  <span className="text-[9px] text-slate-655 dark:text-slate-550 font-bold uppercase block">File Submitted:</span>
+                  <span className="text-[9px] text-slate-600 dark:text-slate-500 font-bold uppercase block">File Submitted:</span>
                   <div className="flex items-center gap-2 text-brand-royal dark:text-brand-royal-300">
                     <FileText className="w-4 h-4" />
                     <span className="font-mono font-medium">{activeAssign.submissionFile}</span>
                   </div>
-                  <p className="text-[10px] text-slate-650 dark:text-slate-500">Submitted on {new Date().toLocaleDateString('en-IN')}</p>
+                  <p className="text-[10px] text-slate-600 dark:text-slate-500">Submitted on {new Date().toLocaleDateString('en-IN')}</p>
                 </div>
               )}
             </div>
           </div>
         ) : (
           <div className="glass-card p-12 text-center border-slate-200 dark:border-white/5 font-sans min-h-[300px] flex flex-col items-center justify-center">
-            <FileText className="w-12 h-12 text-slate-405 dark:text-slate-500 mb-4" />
+            <FileText className="w-12 h-12 text-slate-400 dark:text-slate-500 mb-4" />
             <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">No Homework Sheet Selected</h3>
             <p className="text-xs text-slate-600 dark:text-slate-400">Select an assignment from the log on the right to view instructions and grades.</p>
           </div>
@@ -187,12 +187,12 @@ export const AssignmentPage: React.FC = () => {
 
             <div className="p-4 rounded-none bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-white/5 space-y-4">
               <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/5 pb-2">
-                <span className="text-xs text-slate-705 dark:text-slate-400">Score Awarded:</span>
+                <span className="text-xs text-slate-700 dark:text-slate-400">Score Awarded:</span>
                 <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">{activeAssign.grade}</span>
               </div>
 
-              <div className="space-y-2 text-xs leading-relaxed text-slate-805 dark:text-slate-300">
-                <span className="text-[9px] text-slate-655 dark:text-slate-550 font-bold uppercase block">Teacher Comments:</span>
+              <div className="space-y-2 text-xs leading-relaxed text-slate-800 dark:text-slate-300">
+                <span className="text-[9px] text-slate-600 dark:text-slate-500 font-bold uppercase block">Teacher Comments:</span>
                 <p className="italic">"{activeAssign.feedback}"</p>
               </div>
             </div>
@@ -236,7 +236,7 @@ export const AssignmentPage: React.FC = () => {
                     className={`w-full p-3.5 rounded-none text-left border transition-all flex flex-col gap-1.5 ${
                       isSelected
                         ? 'border-brand-royal bg-brand-royal/10'
-                        : 'border-slate-250 dark:border-white/5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/60 dark:hover:bg-slate-900'
+                        : 'border-slate-300 dark:border-white/5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/60 dark:hover:bg-slate-900'
                     }`}
                   >
                     <div className="flex justify-between items-center w-full gap-2">
@@ -251,7 +251,7 @@ export const AssignmentPage: React.FC = () => {
                         {a.status}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center text-[10px] text-slate-550 dark:text-slate-500 font-semibold w-full">
+                    <div className="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-500 font-semibold w-full">
                       <span className={subjectTextColor}>{a.subjectTitle}</span>
                       <span>Due: {a.deadline}</span>
                     </div>

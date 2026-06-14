@@ -18,7 +18,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const studentLinks = [
     { id: 'student-dash', label: 'Student Hub', icon: LayoutDashboard },
     { id: 'course-view', label: 'Deep Lectures', icon: BookOpen },
-    { id: 'quiz-view', label: 'Quiz Center', icon: Trophy },
     { id: 'assignment-view', label: 'Homework Space', icon: FileText },
     { id: 'webrtc-live', label: 'Live Class (WebRTC)', icon: Tv },
     { id: 'ai-tutor', label: 'AI Tutor Bot', icon: Brain },
@@ -85,7 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             
             <button 
               onClick={onClose}
-              className="md:hidden p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-905 dark:hover:text-slate-100"
+              className="md:hidden p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
             >
               <X className="w-4 h-4" />
             </button>

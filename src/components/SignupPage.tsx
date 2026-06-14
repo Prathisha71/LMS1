@@ -26,10 +26,24 @@ export const SignupPage: React.FC = () => {
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>(['maths-12']);
   const [optedSubjectId, setOptedSubjectId] = useState('maths-12');
 
+  // Sync state with first loaded database board/class if current ids are not in boards list
+  useEffect(() => {
+    if (boards.length > 0) {
+      const existsBoard = boards.some(b => b.id === boardId);
+      if (!existsBoard) {
+        const defaultBoard = boards[0];
+        setBoardId(defaultBoard.id);
+        if (defaultBoard.classes.length > 0) {
+          setClassId(defaultBoard.classes[0].id);
+        }
+      }
+    }
+  }, [boards, boardId]);
+
   // Reset optedSubjectId when Board/Class/Subjects list changes
   useEffect(() => {
     const activeBoard = boards.find(b => b.id === boardId) || boards[0];
-    const activeClass = activeBoard.classes.find(c => c.id === classId) || activeBoard.classes[0];
+    const activeClass = activeBoard?.classes?.find(c => c.id === classId) || activeBoard?.classes?.[0];
     const subjects = activeClass?.subjects || [];
 
     if (subjects.length > 0) {
@@ -219,7 +233,7 @@ export const SignupPage: React.FC = () => {
             {role === 'student' ? (
               <div className="space-y-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-705 uppercase tracking-wide">Full Name</label>
+                  <label className="text-[10px] font-bold text-slate-700 uppercase tracking-wide">Full Name</label>
                   <input
                     type="text"
                     placeholder="e.g. Prathamesh Sharma"
@@ -232,7 +246,7 @@ export const SignupPage: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-705 uppercase tracking-wide flex items-center gap-1">
+                    <label className="text-[10px] font-bold text-slate-700 uppercase tracking-wide flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5 text-slate-500" />
                       <span>Age</span>
                     </label>
@@ -247,7 +261,7 @@ export const SignupPage: React.FC = () => {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-705 uppercase tracking-wide flex items-center gap-1">
+                    <label className="text-[10px] font-bold text-slate-700 uppercase tracking-wide flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5 text-slate-500" />
                       <span>Location</span>
                     </label>
@@ -263,7 +277,7 @@ export const SignupPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-705 uppercase tracking-wide">Create Username</label>
+                  <label className="text-[10px] font-bold text-slate-700 uppercase tracking-wide">Create Username</label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
                     <input
@@ -295,7 +309,7 @@ export const SignupPage: React.FC = () => {
             ) : (
               <div className="space-y-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-705 uppercase tracking-wide">Full Name</label>
+                  <label className="text-[10px] font-bold text-slate-700 uppercase tracking-wide">Full Name</label>
                   <input
                     type="text"
                     placeholder="e.g. Dr. Ramesh Sen"
@@ -307,7 +321,7 @@ export const SignupPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-705 uppercase tracking-wide">Academic Email</label>
+                  <label className="text-[10px] font-bold text-slate-700 uppercase tracking-wide">Academic Email</label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
                     <input
@@ -322,7 +336,7 @@ export const SignupPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-705 uppercase tracking-wide">Password</label>
+                  <label className="text-[10px] font-bold text-slate-700 uppercase tracking-wide">Password</label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
                     <input
@@ -361,7 +375,7 @@ export const SignupPage: React.FC = () => {
             <div className="space-y-4">
               {/* Board Selection */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-705 uppercase tracking-wide">Academic Board</label>
+                <label className="text-[10px] font-bold text-slate-700 uppercase tracking-wide">Academic Board</label>
                 <select
                   value={boardId}
                   onChange={(e) => setBoardId(e.target.value)}
@@ -377,7 +391,7 @@ export const SignupPage: React.FC = () => {
 
               {/* Class Level Selection */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-705 uppercase tracking-wide">Class Level</label>
+                <label className="text-[10px] font-bold text-slate-700 uppercase tracking-wide">Class Level</label>
                 <select
                   value={classId}
                   onChange={(e) => setClassId(e.target.value)}
@@ -440,7 +454,7 @@ export const SignupPage: React.FC = () => {
                   type="button"
                   onClick={() => setPaymentMethod('card')}
                   className={`py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-                    paymentMethod === 'card' ? 'bg-white text-slate-900 border border-slate-305 shadow-sm' : 'text-slate-600'
+                    paymentMethod === 'card' ? 'bg-white text-slate-900 border border-slate-300 shadow-sm' : 'text-slate-600'
                   }`}
                 >
                   <Wallet className="w-3.5 h-3.5" />
@@ -450,7 +464,7 @@ export const SignupPage: React.FC = () => {
                   type="button"
                   onClick={() => setPaymentMethod('upi')}
                   className={`py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-                    paymentMethod === 'upi' ? 'bg-white text-slate-900 border border-slate-305 shadow-sm' : 'text-slate-600'
+                    paymentMethod === 'upi' ? 'bg-white text-slate-900 border border-slate-300 shadow-sm' : 'text-slate-600'
                   }`}
                 >
                   <span>UPI Payment</span>
@@ -460,7 +474,7 @@ export const SignupPage: React.FC = () => {
               {paymentMethod === 'card' ? (
                 <div className="space-y-3 text-left">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-705 uppercase tracking-wide">Card Number</label>
+                    <label className="text-[10px] font-bold text-slate-700 uppercase tracking-wide">Card Number</label>
                     <input
                       type="text"
                       placeholder="4111 2222 3333 4444"
@@ -472,7 +486,7 @@ export const SignupPage: React.FC = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-705 uppercase tracking-wide">Expiry Date</label>
+                      <label className="text-[10px] font-bold text-slate-700 uppercase tracking-wide">Expiry Date</label>
                       <input type="text" placeholder="MM/YY" className="premium-input text-xs" />
                     </div>
                     <div className="space-y-1">

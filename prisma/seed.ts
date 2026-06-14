@@ -1,5 +1,6 @@
 import { PrismaClient, UserRole, QuestionType, LiveClassStatus, AttendanceStatus, NotificationType, BillingPeriod, SubscriptionStatus, PaymentStatus, PaymentGateway, SubmissionStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { initialBoards } from './tnsb-data';
 
 const prisma = new PrismaClient();
 const DEFAULT_PASSWORD = 'password123';
@@ -7,6 +8,36 @@ const DEFAULT_PASSWORD = 'password123';
 async function main() {
   console.log('Starting seed...');
   const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, 10);
+
+  console.log('Cleaning up existing database records...');
+  await prisma.subjectStatistics.deleteMany({});
+  await prisma.learningStreak.deleteMany({});
+  await prisma.studentAnalytics.deleteMany({});
+  await prisma.studentTopicProgress.deleteMany({});
+  await prisma.studentChapterProgress.deleteMany({});
+  await prisma.studentSubjectProgress.deleteMany({});
+  await prisma.assignment.deleteMany({});
+  await prisma.quizOption.deleteMany({});
+  await prisma.quizQuestion.deleteMany({});
+  await prisma.quiz.deleteMany({});
+  await prisma.courseNote.deleteMany({});
+  await prisma.courseVideo.deleteMany({});
+  await prisma.course.deleteMany({});
+  await prisma.payment.deleteMany({});
+  await prisma.subscription.deleteMany({});
+  await prisma.subscriptionPlan.deleteMany({});
+  await prisma.userRoleJoin.deleteMany({});
+  await prisma.student.deleteMany({});
+  await prisma.teacher.deleteMany({});
+  await prisma.admin.deleteMany({});
+  await prisma.user.deleteMany({});
+  await prisma.topic.deleteMany({});
+  await prisma.chapter.deleteMany({});
+  await prisma.unit.deleteMany({});
+  await prisma.subject.deleteMany({});
+  await prisma.class.deleteMany({});
+  await prisma.board.deleteMany({});
+
 
   // ==========================================
   // 1. SEED PERMISSIONS
@@ -63,7 +94,6 @@ async function main() {
   // 3. MAP ROLE TO PERMISSIONS
   // ==========================================
   console.log('Mapping permissions to roles...');
-  // Admin permissions (All)
   for (const permKey in dbPermissions) {
     await prisma.rolePermission.upsert({
       where: {
@@ -80,7 +110,6 @@ async function main() {
     });
   }
 
-  // Teacher permissions
   const teacherPerms = [
     'academic:read',
     'course:write',
@@ -106,7 +135,6 @@ async function main() {
     });
   }
 
-  // Student permissions
   const studentPerms = [
     'academic:read',
     'course:read',
@@ -133,89 +161,155 @@ async function main() {
   }
 
   // ==========================================
-  // 4. DYNAMIC ACADEMIC HIERARCHY
+  // 4. DYNAMIC ACADEMIC HIERARCHY (TNSB ONLY)
   // ==========================================
-  console.log('Seeding Academic Hierarchy...');
+  console.log('Seeding TNSB Academic Hierarchy...');
   
-  // Board
-  const boardCBSE = await prisma.board.upsert({
-    where: { code: 'CBSE' },
-    update: {},
-    create: { name: 'Central Board of Secondary Education', code: 'CBSE' },
-  });
+  let boardTNSB: any;
+  let class12: any;
+  let class9: any;
+  let maths: any;
+  let science: any;
+  let chemistry9: any; // We map this to class 9 science subject
+  
+  let topicMath1: any;
+  let topicMath2: any;
+  let topicPhys1: any;
+  let topicPhys2: any;
+  let topicChem1: any;
+  let topicChem2: any;
+  let topicMatter1: any;
+  let topicMatter2: any;
 
-  // Class
-  const class10 = await prisma.class.upsert({
-    where: { boardId_name: { boardId: boardCBSE.id, name: 'Class 10' } },
-    update: {},
-    create: { name: 'Class 10', sortOrder: 10, boardId: boardCBSE.id },
-  });
+  for (const boardData of initialBoards) {
+    const dbBoard = await prisma.board.upsert({
+      where: { code: boardData.id.toUpperCase() },
+      update: {},
+      create: { name: boardData.title, code: boardData.id.toUpperCase() },
+    });
+    
+    if (boardData.id === 'tnsb') {
+      boardTNSB = dbBoard;
+    }
 
-  // Subject
-  const physics = await prisma.subject.upsert({
-    where: { classId_name: { classId: class10.id, name: 'Physics' } },
-    update: {},
-    create: { name: 'Physics', code: 'PHY10', sortOrder: 1, classId: class10.id },
-  });
+    for (let cIndex = 0; cIndex < boardData.classes.length; cIndex++) {
+      const classData = boardData.classes[cIndex];
+      const sortOrder = classData.id === 'class-12' ? 12 : classData.id === 'class-11' ? 11 : classData.id === 'class-10' ? 10 : 9;
+      const dbClass = await prisma.class.upsert({
+        where: { boardId_name: { boardId: dbBoard.id, name: classData.title } },
+        update: {},
+        create: { name: classData.title, sortOrder, boardId: dbBoard.id },
+      });
 
-  // Unit
-  const unitOptics = await prisma.unit.upsert({
-    where: { subjectId_name: { subjectId: physics.id, name: 'Light & Optics' } },
-    update: {},
-    create: { name: 'Light & Optics', sortOrder: 1, subjectId: physics.id },
-  });
+      if (boardData.id === 'tnsb') {
+        if (classData.id === 'class-12') class12 = dbClass;
+        if (classData.id === 'class-9') class9 = dbClass;
+      }
 
-  // Chapter
-  const chapterReflection = await prisma.chapter.upsert({
-    where: { unitId_name: { unitId: unitOptics.id, name: 'Reflection of Light' } },
-    update: {},
-    create: { name: 'Reflection of Light', sortOrder: 1, unitId: unitOptics.id },
-  });
+      for (let sIndex = 0; sIndex < classData.subjects.length; sIndex++) {
+        const subjectData = classData.subjects[sIndex];
+        const dbSubject = await prisma.subject.upsert({
+          where: { classId_name: { classId: dbClass.id, name: subjectData.title } },
+          update: {},
+          create: {
+            name: subjectData.title,
+            code: subjectData.id.toUpperCase(),
+            sortOrder: sIndex + 1,
+            classId: dbClass.id
+          }
+        });
 
-  // Topics (Sequential)
-  const topic1 = await prisma.topic.upsert({
-    where: { chapterId_name: { chapterId: chapterReflection.id, name: 'Introduction to Reflection & Mirrors' } },
-    update: {},
-    create: {
-      name: 'Introduction to Reflection & Mirrors',
-      sortOrder: 1,
-      chapterId: chapterReflection.id,
-      requireWatchPercent: 90.0,
-      requireQuizPass: true,
-      requireAssignSubmit: false,
-      requireNotesViewed: false,
-    },
-  });
+        if (boardData.id === 'tnsb') {
+          if (classData.id === 'class-12') {
+            if (subjectData.id === 'maths-12') maths = dbSubject;
+            if (subjectData.id === 'science-12') science = dbSubject;
+          }
+          if (classData.id === 'class-9') {
+            if (subjectData.id === 'science-9') chemistry9 = dbSubject;
+          }
+        }
 
-  const topic2 = await prisma.topic.upsert({
-    where: { chapterId_name: { chapterId: chapterReflection.id, name: 'Spherical Mirrors & Ray Diagrams' } },
-    update: {},
-    create: {
-      name: 'Spherical Mirrors & Ray Diagrams',
-      sortOrder: 2,
-      chapterId: chapterReflection.id,
-      prerequisiteTopicId: topic1.id,
-      requireWatchPercent: 90.0,
-      requireQuizPass: true,
-      requireAssignSubmit: false,
-      requireNotesViewed: false,
-    },
-  });
+        // Create a default unit:
+        const dbUnit = await prisma.unit.upsert({
+          where: { subjectId_name: { subjectId: dbSubject.id, name: 'Core Syllabus' } },
+          update: {},
+          create: {
+            name: 'Core Syllabus',
+            sortOrder: 1,
+            subjectId: dbSubject.id
+          }
+        });
 
-  const topic3 = await prisma.topic.upsert({
-    where: { chapterId_name: { chapterId: chapterReflection.id, name: 'Mirror Formula & Magnification' } },
-    update: {},
-    create: {
-      name: 'Mirror Formula & Magnification',
-      sortOrder: 3,
-      chapterId: chapterReflection.id,
-      prerequisiteTopicId: topic2.id,
-      requireWatchPercent: 90.0,
-      requireQuizPass: true,
-      requireAssignSubmit: true,
-      requireNotesViewed: true,
-    },
-  });
+        for (let chapIndex = 0; chapIndex < subjectData.chapters.length; chapIndex++) {
+          const chapterData = subjectData.chapters[chapIndex];
+          const dbChapter = await prisma.chapter.upsert({
+            where: { unitId_name: { unitId: dbUnit.id, name: chapterData.title } },
+            update: {},
+            create: {
+              name: chapterData.title,
+              sortOrder: chapIndex + 1,
+              unitId: dbUnit.id
+            }
+          });
+
+          for (let topIndex = 0; topIndex < chapterData.topics.length; topIndex++) {
+            const topicData = chapterData.topics[topIndex];
+            const dbTopic = await prisma.topic.upsert({
+              where: { chapterId_name: { chapterId: dbChapter.id, name: topicData.title } },
+              update: {},
+              create: {
+                name: topicData.title,
+                sortOrder: topIndex + 1,
+                chapterId: dbChapter.id,
+                requireWatchPercent: 90.0,
+                requireQuizPass: true
+              }
+            });
+
+            // Map standard topic variables for later courses/materials seeding
+            if (boardData.id === 'tnsb') {
+              if (classData.id === 'class-12') {
+                if (subjectData.id === 'maths-12') {
+                  if (topicData.title.includes('1.1 Adjoint')) topicMath1 = dbTopic;
+                  if (topicData.title.includes('1.2 Solving')) topicMath2 = dbTopic;
+                }
+                if (subjectData.id === 'science-12') {
+                  if (topicData.title.includes('1.1 Electrostatics')) topicPhys1 = dbTopic;
+                  if (topicData.title.includes('1.2 Magnetism')) topicPhys2 = dbTopic;
+                  if (topicData.title.includes('2.1 Metallurgy')) topicChem1 = dbTopic;
+                  if (topicData.title.includes('2.2 Electrochemistry')) topicChem2 = dbTopic;
+                }
+              }
+              if (classData.id === 'class-9') {
+                if (subjectData.id === 'science-9') {
+                  if (topicData.title.includes('2.1 Matter')) topicMatter1 = dbTopic;
+                  if (topicData.title.includes('2.2 Atomic')) topicMatter2 = dbTopic;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Fallbacks in case titles mismatched slightly:
+  if (!topicMath1) topicMath1 = await prisma.topic.findFirst({ where: { chapter: { unit: { subjectId: maths.id } } } });
+  if (!topicMath2) topicMath2 = await prisma.topic.findFirst({ where: { chapter: { unit: { subjectId: maths.id } }, NOT: { id: topicMath1?.id } } });
+  if (!topicPhys1) topicPhys1 = await prisma.topic.findFirst({ where: { name: { contains: 'Electrostatics' }, chapter: { unit: { subjectId: science.id } } } });
+  if (!topicPhys2) topicPhys2 = await prisma.topic.findFirst({ where: { name: { contains: 'Magnetism' }, chapter: { unit: { subjectId: science.id } } } });
+  if (!topicChem1) topicChem1 = await prisma.topic.findFirst({ where: { name: { contains: 'Metallurgy' }, chapter: { unit: { subjectId: science.id } } } });
+  if (!topicChem2) topicChem2 = await prisma.topic.findFirst({ where: { name: { contains: 'Electrochemistry' }, chapter: { unit: { subjectId: science.id } } } });
+  if (!topicMatter1) topicMatter1 = await prisma.topic.findFirst({ where: { name: { contains: 'Matter Around Us' }, chapter: { unit: { subjectId: chemistry9.id } } } });
+  if (!topicMatter2) topicMatter2 = await prisma.topic.findFirst({ where: { name: { contains: 'Atomic Structure' }, chapter: { unit: { subjectId: chemistry9.id } } } });
+
+
+
+  const chapterMatrices = await prisma.chapter.findFirst({ where: { name: { contains: 'Matrices' }, unit: { subjectId: maths.id } } });
+  const chapterElectrostatics = await prisma.chapter.findFirst({ where: { name: { contains: 'Physics' }, unit: { subjectId: science.id } } });
+  const chapterMetallurgy = await prisma.chapter.findFirst({ where: { name: { contains: 'Chemistry' }, unit: { subjectId: science.id } } });
+
+
 
   // ==========================================
   // 5. SEED USERS & ROLES
@@ -284,8 +378,8 @@ async function main() {
     create: {
       email: 'student@eduverse.com',
       passwordHash,
-      firstName: 'Rohan',
-      lastName: 'Verma',
+      firstName: 'Prathamesh',
+      lastName: 'Sharma',
       role: UserRole.STUDENT,
       phoneNumber: '9876543212',
     },
@@ -296,8 +390,8 @@ async function main() {
     update: {},
     create: {
       id: studentUser.id,
-      classId: class10.id,
-      boardId: boardCBSE.id,
+      classId: class12.id,
+      boardId: boardTNSB.id,
     },
   });
 
@@ -355,176 +449,185 @@ async function main() {
   // 7. SEED COURSES & CONTENT
   // ==========================================
   console.log('Seeding Courses and Materials...');
-  const coursePhysics = await prisma.course.create({
+
+  // Maths Course
+  const courseMaths = await prisma.course.create({
     data: {
-      title: 'CBSE Class 10 Physics Masterclass',
-      description: 'Comprehensive high-scoring masterclass for Class 10 CBSE Board Physics.',
-      thumbnailUrl: 'https://images.eduverse.com/courses/cbse10_phy.jpg',
-      subjectId: physics.id,
-      classId: class10.id,
-      boardId: boardCBSE.id,
+      title: 'TNSB Class 12 Mathematics Masterclass',
+      description: 'Comprehensive guide for Class 12 Tamil Nadu State Board Mathematics.',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&q=80&w=300',
+      subjectId: maths.id,
+      classId: class12.id,
+      boardId: boardTNSB.id,
       teacherId: dbTeacher.id,
     },
   });
 
-  // Topic 1 Content
-  const video1 = await prisma.courseVideo.create({
+  // Science Course
+  const courseScience = await prisma.course.create({
     data: {
-      title: 'Intro to Light Reflection & Law of Reflection',
-      videoUrl: 'https://streaming.eduverse.com/physics/10/reflection_intro.mpd',
-      thumbnailUrl: 'https://images.eduverse.com/thumbnails/reflection_intro.jpg',
-      duration: 720, // 12 minutes
-      drmMetadata: {
-        keyId: 'cbse10-phy-ref-001',
-        provider: 'VdoCipher',
-        token: 'vdo_token_reflection_intro_abc123',
-      },
-      topicId: topic1.id,
+      title: 'TNSB Class 12 Science Masterclass',
+      description: 'Comprehensive guide for Class 12 Tamil Nadu State Board Science.',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&w=800&q=80',
+      subjectId: science.id,
+      classId: class12.id,
+      boardId: boardTNSB.id,
+      teacherId: dbTeacher.id,
+    },
+  });
+
+
+  // Videos
+  await prisma.courseVideo.create({
+    data: {
+      title: 'Intro to Matrices and Determinants',
+      videoUrl: 'https://www.w3schools.com/html/movie.mp4',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&q=80&w=300',
+      duration: 930, // 15m 30s
+      topicId: topicMath1.id,
       sortOrder: 1,
     },
   });
 
-  const note1 = await prisma.courseNote.create({
+  await prisma.courseVideo.create({
     data: {
-      title: 'Reflection Laws & Plane Mirror Characteristics',
-      fileUrl: 'https://storage.eduverse.com/notes/class10/physics/reflection_laws.pdf',
-      topicId: topic1.id,
+      title: 'Coulomb\'s Law Basics',
+      videoUrl: 'https://www.w3schools.com/html/movie.mp4',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?auto=format&fit=crop&q=80&w=300',
+      duration: 900,
+      topicId: topicPhys1.id,
+      sortOrder: 1,
+    },
+  });
+
+  await prisma.courseVideo.create({
+    data: {
+      title: 'Alloys and Metal Properties',
+      videoUrl: 'https://www.w3schools.com/html/movie.mp4',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?auto=format&fit=crop&q=80&w=300',
+      duration: 1440,
+      topicId: topicChem1.id,
+      sortOrder: 1,
+    },
+  });
+
+  // Notes
+  await prisma.courseNote.create({
+    data: {
+      title: 'Adjoint & Inverse Formulas Sheet',
+      fileUrl: '/adjoint_inverse_rank_notes.pdf',
+      topicId: topicMath1.id,
       sortOrder: 1,
       isRequiredForComplete: true,
     },
   });
 
-  // Topic 1 Quiz
-  const quiz1 = await prisma.quiz.create({
+  // Quizzes
+  const quizMath = await prisma.quiz.create({
     data: {
-      title: 'Laws of Reflection & Mirrors Basics Quiz',
-      description: 'Test your understanding of reflection rules and basic properties of mirrors.',
-      topicId: topic1.id,
-      passingScore: 80.0, // 80% passing criteria
+      title: 'Matrices Basics Assessment',
+      description: 'Test your understanding of matrices and determinants properties.',
+      topicId: topicMath1.id,
+      passingScore: 80.0,
       maxAttempts: 3,
-      timeLimitMinutes: 15,
+      timeLimitMinutes: 10,
     },
   });
 
-  const question1 = await prisma.quizQuestion.create({
+  const questionMath1 = await prisma.quizQuestion.create({
     data: {
-      quizId: quiz1.id,
-      questionText: 'According to the Laws of Reflection, which of the following is correct?',
+      quizId: quizMath.id,
+      questionText: 'If A is a square matrix of order 3 and |A| = 5, what is the value of |adj A|?',
       questionType: QuestionType.MCQ,
-      marks: 4.0,
+      marks: 5.0,
       sortOrder: 1,
     },
   });
 
   await prisma.quizOption.createMany({
     data: [
-      { questionId: question1.id, optionText: 'Angle of incidence is equal to angle of reflection (i = r)', isCorrect: true, sortOrder: 1 },
-      { questionId: question1.id, optionText: 'Angle of incidence is double the angle of reflection (i = 2r)', isCorrect: false, sortOrder: 2 },
-      { questionId: question1.id, optionText: 'Angle of incidence is half of angle of reflection (2i = r)', isCorrect: false, sortOrder: 3 },
-      { questionId: question1.id, optionText: 'There is no relationship between angle of incidence and angle of reflection', isCorrect: false, sortOrder: 4 },
+      { questionId: questionMath1.id, optionText: '5', isCorrect: false, sortOrder: 1 },
+      { questionId: questionMath1.id, optionText: '25', isCorrect: true, sortOrder: 2 },
+      { questionId: questionMath1.id, optionText: '125', isCorrect: false, sortOrder: 3 },
+      { questionId: questionMath1.id, optionText: '1', isCorrect: false, sortOrder: 4 },
     ],
   });
 
-  const question2 = await prisma.quizQuestion.create({
+  const questionMath2 = await prisma.quizQuestion.create({
     data: {
-      quizId: quiz1.id,
-      questionText: 'An image formed by a plane mirror is always:',
+      quizId: quizMath.id,
+      questionText: 'Which method is used for solving a system of linear equations using determinants?',
       questionType: QuestionType.MCQ,
-      marks: 4.0,
+      marks: 5.0,
       sortOrder: 2,
     },
   });
 
   await prisma.quizOption.createMany({
     data: [
-      { questionId: question2.id, optionText: 'Real and Inverted', isCorrect: false, sortOrder: 1 },
-      { questionId: question2.id, optionText: 'Virtual and Erect', isCorrect: true, sortOrder: 2 },
-      { questionId: question2.id, optionText: 'Real and Erect', isCorrect: false, sortOrder: 3 },
-      { questionId: question2.id, optionText: 'Virtual and Inverted', isCorrect: false, sortOrder: 4 },
+      { questionId: questionMath2.id, optionText: 'Gaussian Elimination', isCorrect: false, sortOrder: 1 },
+      { questionId: questionMath2.id, optionText: 'Cramer\'s Rule', isCorrect: true, sortOrder: 2 },
+      { questionId: questionMath2.id, optionText: 'Matrix Inversion', isCorrect: false, sortOrder: 3 },
+      { questionId: questionMath2.id, optionText: 'Euler\'s Method', isCorrect: false, sortOrder: 4 },
     ],
   });
 
-  // Topic 3 Assignment
-  const assignment3 = await prisma.assignment.create({
+  // Assignments
+  await prisma.assignment.create({
     data: {
-      title: 'Mirror Formula & Magnification Problem Set',
-      description: 'Solve the 5 problems on mirror formula (1/f = 1/v + 1/u) and magnification (m = -v/u) in the attached sheet. Show all working steps.',
-      fileUrl: 'https://storage.eduverse.com/assignments/class10/physics/mirror_problems.pdf',
-      topicId: topic3.id,
-      maxMarks: 50.0,
-      passingMarks: 20.0,
-      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      title: 'Solving Systems of Linear Equations by Cramer\'s Rule',
+      description: 'Solve the systems of equations using Cramer\'s rule, Matrix inversion method, and Gaussian elimination. Show step-by-step calculations and submit a PDF file.',
+      fileUrl: '/cramer_proof.pdf',
+      topicId: topicMath2.id,
+      maxMarks: 100.0,
+      passingMarks: 40.0,
+      deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
     },
   });
 
   // ==========================================
-  // 8. SEED INITIAL PROGRESS (STUDENT TOPIC 1 UNLOCKED)
+  // 8. SEED INITIAL PROGRESS
   // ==========================================
   console.log('Seeding initial student progress...');
   
-  // Subject level progress
+  // Mathematics progress
   await prisma.studentSubjectProgress.create({
-    data: {
-      studentId: dbStudent.id,
-      subjectId: physics.id,
-      isCompleted: false,
-      completedPercentage: 0.0,
-      unlocked: true,
-    },
+    data: { studentId: dbStudent.id, subjectId: maths.id, isCompleted: false, completedPercentage: 0.0, unlocked: true },
   });
-
-  // Chapter level progress
   await prisma.studentChapterProgress.create({
-    data: {
-      studentId: dbStudent.id,
-      chapterId: chapterReflection.id,
-      isCompleted: false,
-      completedPercentage: 0.0,
-      unlocked: true,
-    },
+    data: { studentId: dbStudent.id, chapterId: chapterMatrices.id, isCompleted: false, completedPercentage: 0.0, unlocked: true },
+  });
+  await prisma.studentTopicProgress.create({
+    data: { studentId: dbStudent.id, topicId: topicMath1.id, unlocked: true, isCompleted: false, watchPercent: 0.0, quizCompleted: false, assignmentCompleted: false, notesViewed: false },
+  });
+  await prisma.studentTopicProgress.create({
+    data: { studentId: dbStudent.id, topicId: topicMath2.id, unlocked: false, isCompleted: false, watchPercent: 0.0, quizCompleted: false, assignmentCompleted: false, notesViewed: false },
   });
 
-  // Topic 1 progress (unlocked since it has no prerequisite)
+  // Science progress
+  await prisma.studentSubjectProgress.create({
+    data: { studentId: dbStudent.id, subjectId: science.id, isCompleted: false, completedPercentage: 0.0, unlocked: true },
+  });
+  await prisma.studentChapterProgress.create({
+    data: { studentId: dbStudent.id, chapterId: chapterElectrostatics.id, isCompleted: false, completedPercentage: 0.0, unlocked: true },
+  });
   await prisma.studentTopicProgress.create({
-    data: {
-      studentId: dbStudent.id,
-      topicId: topic1.id,
-      unlocked: true,
-      isCompleted: false,
-      watchPercent: 0.0,
-      quizCompleted: false,
-      assignmentCompleted: false,
-      notesViewed: false,
-    },
+    data: { studentId: dbStudent.id, topicId: topicPhys1.id, unlocked: true, isCompleted: false, watchPercent: 0.0, quizCompleted: false, assignmentCompleted: false, notesViewed: false },
+  });
+  await prisma.studentTopicProgress.create({
+    data: { studentId: dbStudent.id, topicId: topicPhys2.id, unlocked: false, isCompleted: false, watchPercent: 0.0, quizCompleted: false, assignmentCompleted: false, notesViewed: false },
   });
 
-  // Topic 2 progress (locked since Topic 1 is not completed)
+  await prisma.studentChapterProgress.create({
+    data: { studentId: dbStudent.id, chapterId: chapterMetallurgy.id, isCompleted: false, completedPercentage: 0.0, unlocked: true },
+  });
   await prisma.studentTopicProgress.create({
-    data: {
-      studentId: dbStudent.id,
-      topicId: topic2.id,
-      unlocked: false,
-      isCompleted: false,
-      watchPercent: 0.0,
-      quizCompleted: false,
-      assignmentCompleted: false,
-      notesViewed: false,
-    },
+    data: { studentId: dbStudent.id, topicId: topicChem1.id, unlocked: true, isCompleted: false, watchPercent: 0.0, quizCompleted: false, assignmentCompleted: false, notesViewed: false },
+  });
+  await prisma.studentTopicProgress.create({
+    data: { studentId: dbStudent.id, topicId: topicChem2.id, unlocked: false, isCompleted: false, watchPercent: 0.0, quizCompleted: false, assignmentCompleted: false, notesViewed: false },
   });
 
-  // Topic 3 progress (locked)
-  await prisma.studentTopicProgress.create({
-    data: {
-      studentId: dbStudent.id,
-      topicId: topic3.id,
-      unlocked: false,
-      isCompleted: false,
-      watchPercent: 0.0,
-      quizCompleted: false,
-      assignmentCompleted: false,
-      notesViewed: false,
-    },
-  });
 
   // ==========================================
   // 9. SEED ANALYTICS & GAMIFICATION
@@ -533,18 +636,18 @@ async function main() {
   await prisma.studentAnalytics.create({
     data: {
       studentId: dbStudent.id,
-      totalStudyTimeMinutes: 0,
-      averageQuizScore: 0.0,
-      overallCompletionRate: 0.0,
-      xp: 100, // starting xp
+      totalStudyTimeMinutes: 45,
+      averageQuizScore: 90.0,
+      overallCompletionRate: 15.0,
+      xp: 2100,
     },
   });
 
   await prisma.learningStreak.create({
     data: {
       studentId: dbStudent.id,
-      currentStreak: 1,
-      longestStreak: 1,
+      currentStreak: 9,
+      longestStreak: 12,
       lastActivityDate: new Date(),
     },
   });
@@ -552,9 +655,9 @@ async function main() {
   await prisma.subjectStatistics.create({
     data: {
       studentId: dbStudent.id,
-      subjectId: physics.id,
+      subjectId: maths.id,
       topicsCompleted: 0,
-      totalTopics: 3,
+      totalTopics: 2,
       quizzesTaken: 0,
       quizzesPassed: 0,
       averageScore: 0.0,

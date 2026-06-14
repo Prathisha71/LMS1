@@ -200,7 +200,7 @@ export const StudentDashboard: React.FC = () => {
           {/* Upcoming Live Classes Card */}
           <div className="glass-card p-5 border-slate-200 dark:border-white/5 space-y-4">
             <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-left">Upcoming Live Classes</h3>
-            <p className="text-xs text-slate-600 dark:text-slate-550 text-center py-4">No upcoming live classes scheduled.</p>
+            <p className="text-xs text-slate-600 dark:text-slate-500 text-center py-4">No upcoming live classes scheduled.</p>
           </div>
 
           {/* Assignments Tracker Card */}

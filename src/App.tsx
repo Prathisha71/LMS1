@@ -15,7 +15,7 @@ import { TeacherDashboard } from './components/TeacherDashboard';
 import { AdminPortal } from './components/AdminPortal';
 
 function App() {
-  const { activeView, isDarkMode, setView } = useLmsStore();
+  const { activeView, isDarkMode, setView, profile, boards } = useLmsStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Load academic structure from API when available
@@ -31,6 +31,68 @@ function App() {
         // keep demo boards when API is offline
       });
   }, []);
+
+  // Synchronize mock IDs to database UUIDs whenever boards or profile changes
+  useEffect(() => {
+    if (boards?.length > 0 && profile) {
+      let updated = false;
+      const newProfile = { ...profile };
+
+      // 1. Board ID mapping
+      const matchedBoard = boards.find(
+        (b) =>
+          b.id === profile.selectedBoardId ||
+          b.code?.toLowerCase() === profile.selectedBoardId?.toLowerCase()
+      );
+      if (matchedBoard && matchedBoard.id !== profile.selectedBoardId) {
+        newProfile.selectedBoardId = matchedBoard.id;
+        updated = true;
+      }
+
+      // 2. Class ID mapping
+      const activeBoard = matchedBoard || boards[0];
+      if (activeBoard) {
+        const matchedClass = activeBoard.classes.find(
+          (c) =>
+            c.id === profile.selectedClassId ||
+            c.title?.toLowerCase().replace(/\s+/g, '-') ===
+              profile.selectedClassId?.toLowerCase().replace(/\s+/g, '-') ||
+            (c.title === 'Class 12' && profile.selectedClassId === 'class-12') ||
+            (c.title === 'Class 9' && profile.selectedClassId === 'class-9')
+        );
+        if (matchedClass && matchedClass.id !== profile.selectedClassId) {
+          newProfile.selectedClassId = matchedClass.id;
+          updated = true;
+        }
+
+        // 3. Subject ID mapping
+        const activeClass = matchedClass || activeBoard.classes[0];
+        if (activeClass) {
+          const matchedSubject = activeClass.subjects.find(
+            (s) =>
+              s.id === profile.optedSubjectId ||
+              s.title?.toLowerCase() === profile.optedSubjectId?.toLowerCase() ||
+              s.title?.toLowerCase().replace(/\s+/g, '-') ===
+                profile.optedSubjectId?.toLowerCase().replace(/\s+/g, '-') ||
+              (s.title === 'Mathematics' && profile.optedSubjectId === 'maths-12') ||
+              (s.title === 'Chemistry' && profile.optedSubjectId === 'chemistry-12') ||
+              (s.title === 'Physics' && profile.optedSubjectId === 'physics-12')
+          );
+          if (matchedSubject && matchedSubject.id !== profile.optedSubjectId) {
+            newProfile.optedSubjectId = matchedSubject.id;
+            updated = true;
+          }
+        }
+      }
+
+      if (updated) {
+        useLmsStore.setState({
+          profile: newProfile,
+          activeSubjectId: newProfile.optedSubjectId,
+        });
+      }
+    }
+  }, [boards, profile]);
 
   // Sync URL hash with the store's activeView to support browser back/forward buttons
   useEffect(() => {
@@ -95,7 +157,7 @@ function App() {
   const isPublicPage = activeView === 'landing' || activeView === 'login' || activeView === 'signup';
 
   return (
-    <div className={`${isDarkMode ? 'dark' : 'light'} min-h-screen bg-white dark:bg-brand-navy-dark transition-colors duration-300`}>
+    <div className={`${isDarkMode ? 'dark' : 'light'} min-h-screen bg-white dark:bg-brand-navy-dark text-slate-800 dark:text-slate-100 transition-colors duration-300`}>
       {isPublicPage ? (
         // Public pages do not require Sidebar/Header shells
         <>

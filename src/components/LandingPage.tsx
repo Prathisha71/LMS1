@@ -62,7 +62,7 @@ export const LandingPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-605">
+        <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
           <a href="#features" className="hover:text-slate-900 transition-colors">Curriculum</a>
           <a href="#pricing" className="hover:text-slate-900 transition-colors">Membership</a>
           <a href="#testimonials" className="hover:text-slate-900 transition-colors">Testimonials</a>

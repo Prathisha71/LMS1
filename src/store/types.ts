@@ -48,6 +48,7 @@ export interface Topic {
   content: string;
   duration: string;
   pdfUrl?: string;
+  videoUrl?: string;
   isCompleted: boolean;
 }
 
@@ -75,6 +76,7 @@ export interface ClassLevel {
 export interface Board {
   id: string;
   title: string;
+  code?: string;
   classes: ClassLevel[];
 }
 

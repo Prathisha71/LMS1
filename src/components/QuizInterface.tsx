@@ -13,7 +13,7 @@ export const QuizInterface: React.FC = () => {
     boards, quizzes, activeQuizId, setActiveQuiz, submitQuizResult, setView, setActiveCourseContext, profile 
   } = useLmsStore();
 
-  const activeBoard = boards.find(b => b.id === 'tnsb') || boards[0];
+  const activeBoard = boards.find(b => b.id === profile.selectedBoardId) || boards[0];
 
   // Selection states (Class-level and Subject-level selections)
   const [selectedClassId, setSelectedClassId] = useState(profile.selectedClassId || 'class-9');
@@ -246,13 +246,16 @@ export const QuizInterface: React.FC = () => {
             <div className="flex gap-2">
               {subjects.map((sub) => {
                 const isSelected = selectedSubjectId === sub.id;
+                const isChem = sub.title.toLowerCase().includes('chemistry') || sub.id.toLowerCase().includes('chemistry');
                 return (
                   <button
                     key={sub.id}
                     onClick={() => setSelectedSubjectId(sub.id)}
                     className={`py-2 px-6 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 ${
                       isSelected
-                        ? 'bg-gradient-to-r from-brand-violet to-fuchsia-600 border-brand-violet text-white shadow-md'
+                        ? isChem
+                          ? 'bg-gradient-to-r from-emerald-500 to-green-600 border-emerald-500 text-white shadow-md'
+                          : 'bg-gradient-to-r from-brand-royal to-blue-600 border-brand-royal text-white shadow-md'
                         : 'bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                     }`}
                   >
@@ -271,7 +274,7 @@ export const QuizInterface: React.FC = () => {
             <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
               Available Chapter Assessments ({chapters.length})
             </h4>
-            <span className="text-[10px] text-slate-605 dark:text-slate-500 font-bold bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-white/5">
+            <span className="text-[10px] text-slate-600 dark:text-slate-500 font-bold bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-white/5">
               Class {selectedClassId.replace('class-', '')} • {activeSubject?.title}
             </span>
           </div>
@@ -289,7 +292,7 @@ export const QuizInterface: React.FC = () => {
                       Chapter Module
                     </span>
                     <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-1 leading-snug">{chap.title}</h4>
-                    <p className="text-[11px] text-slate-605 dark:text-slate-400 leading-normal line-clamp-2">
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-normal line-clamp-2">
                       Test your understanding of the concepts introduced in this chapter of the Class {selectedClassId.replace('class-', '')} Samacheer Kalvi syllabus.
                     </p>
                   </div>
@@ -375,7 +378,7 @@ export const QuizInterface: React.FC = () => {
                         ? 'border-brand-royal bg-brand-royal text-white shadow-lg'
                         : isSelected
                         ? 'border-brand-violet/30 bg-brand-violet/10 text-brand-violet'
-                        : 'border-slate-200 dark:border-white/5 bg-slate-105 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        : 'border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                     }`}
                   >
                     {idx + 1}
@@ -474,7 +477,7 @@ export const QuizInterface: React.FC = () => {
             <div className="flex justify-center items-center gap-8 py-4">
               <div className="text-center">
                 <span className="text-4xl font-black text-slate-900 dark:text-white">{result?.score}</span>
-                <span className="text-slate-555 text-lg"> / {result?.totalQuestions}</span>
+                <span className="text-slate-500 text-lg"> / {result?.totalQuestions}</span>
                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Correct Answers</p>
               </div>
               <div className="w-[1px] h-12 bg-slate-200 dark:bg-white/10" />
@@ -546,7 +549,7 @@ export const QuizInterface: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-white/5 text-xs text-slate-650 dark:text-slate-400">
+                    <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-white/5 text-xs text-slate-600 dark:text-slate-400">
                       <span className="text-[9px] text-brand-violet font-bold uppercase block mb-1">Explanation:</span>
                       <p className="leading-relaxed">{detail.explanation}</p>
                     </div>

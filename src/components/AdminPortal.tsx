@@ -80,7 +80,7 @@ export const AdminPortal: React.FC = () => {
           className={`pb-3 text-xs font-semibold flex items-center gap-1.5 border-b-2 transition-all ${
             activeView === 'admin-structure'
               ? 'border-brand-royal text-brand-royal dark:text-white'
-              : 'border-transparent text-slate-550 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'
+              : 'border-transparent text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'
           }`}
         >
           <Settings className="w-4 h-4" />
@@ -92,7 +92,7 @@ export const AdminPortal: React.FC = () => {
           className={`pb-3 text-xs font-semibold flex items-center gap-1.5 border-b-2 transition-all ${
             activeView === 'admin-analytics'
               ? 'border-brand-royal text-brand-royal dark:text-white'
-              : 'border-transparent text-slate-550 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'
+              : 'border-transparent text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'
           }`}
         >
           <BarChart3 className="w-4 h-4" />
@@ -112,7 +112,7 @@ export const AdminPortal: React.FC = () => {
             
             <form onSubmit={handleAddBoard} className="space-y-3">
               <div className="space-y-1">
-                <label className="text-[9px] font-bold text-slate-650 dark:text-slate-500 uppercase">Board Title</label>
+                <label className="text-[9px] font-bold text-slate-600 dark:text-slate-500 uppercase">Board Title</label>
                 <input 
                   type="text" 
                   placeholder="e.g. ICSE Board" 
@@ -129,7 +129,7 @@ export const AdminPortal: React.FC = () => {
             </form>
 
             <div className="space-y-2 pt-4 border-t border-slate-200 dark:border-white/5">
-              <span className="text-[10px] font-bold text-slate-650 dark:text-slate-500 uppercase">Board List</span>
+              <span className="text-[10px] font-bold text-slate-600 dark:text-slate-500 uppercase">Board List</span>
               <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
                 {boards.map(b => (
                   <button
@@ -159,14 +159,14 @@ export const AdminPortal: React.FC = () => {
 
             <form onSubmit={handleAddClass} className="space-y-3">
               <div className="space-y-1">
-                <label className="text-[9px] font-bold text-slate-655 dark:text-slate-500 uppercase">Active Board context</label>
-                <div className="text-xs text-slate-800 bg-slate-100 p-2.5 rounded-lg border border-slate-250 font-semibold dark:text-slate-300 dark:bg-slate-950 dark:border-white/5">
+                <label className="text-[9px] font-bold text-slate-600 dark:text-slate-500 uppercase">Active Board context</label>
+                <div className="text-xs text-slate-800 bg-slate-100 p-2.5 rounded-lg border border-slate-300 font-semibold dark:text-slate-300 dark:bg-slate-950 dark:border-white/5">
                   {activeBoard?.title || 'None Selected'}
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] font-bold text-slate-650 dark:text-slate-500 uppercase">Class Title</label>
+                <label className="text-[9px] font-bold text-slate-600 dark:text-slate-500 uppercase">Class Title</label>
                 <input 
                   type="text" 
                   placeholder="e.g. Class 11" 
@@ -187,9 +187,9 @@ export const AdminPortal: React.FC = () => {
             </form>
 
             <div className="space-y-2 pt-4 border-t border-slate-200 dark:border-white/5">
-              <span className="text-[10px] font-bold text-slate-650 dark:text-slate-500 uppercase">Class List under Board</span>
+              <span className="text-[10px] font-bold text-slate-600 dark:text-slate-500 uppercase">Class List under Board</span>
               {activeBoard?.classes.length === 0 ? (
-                <p className="text-xs text-slate-650 dark:text-slate-500 text-center py-4">No classes registered.</p>
+                <p className="text-xs text-slate-600 dark:text-slate-500 text-center py-4">No classes registered.</p>
               ) : (
                 <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
                   {activeBoard?.classes.map(c => (
@@ -218,14 +218,14 @@ export const AdminPortal: React.FC = () => {
 
             <form onSubmit={handleAddSubject} className="space-y-3">
               <div className="space-y-1">
-                <label className="text-[9px] font-bold text-slate-650 dark:text-slate-500 uppercase">Academic Link context</label>
-                <div className="text-[10px] text-slate-800 bg-slate-100 p-2.5 rounded-lg border border-slate-250 font-mono dark:text-slate-300 dark:bg-slate-950 dark:border-white/5">
+                <label className="text-[9px] font-bold text-slate-600 dark:text-slate-500 uppercase">Academic Link context</label>
+                <div className="text-[10px] text-slate-800 bg-slate-100 p-2.5 rounded-lg border border-slate-300 font-mono dark:text-slate-300 dark:bg-slate-950 dark:border-white/5">
                   {activeBoard?.title} &gt; {activeClass?.title || 'None Selected'}
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] font-bold text-slate-655 dark:text-slate-500 uppercase">Subject Title</label>
+                <label className="text-[9px] font-bold text-slate-600 dark:text-slate-500 uppercase">Subject Title</label>
                 <input 
                   type="text" 
                   placeholder="e.g. Biology Elective" 
@@ -238,7 +238,7 @@ export const AdminPortal: React.FC = () => {
 
               {/* Color choice */}
               <div className="space-y-1">
-                <label className="text-[9px] font-bold text-slate-650 dark:text-slate-500 uppercase">Visual Accent</label>
+                <label className="text-[9px] font-bold text-slate-600 dark:text-slate-500 uppercase">Visual Accent</label>
                 <select 
                   value={newSubjectColor}
                   onChange={(e) => setNewSubjectColor(e.target.value)}
@@ -261,9 +261,9 @@ export const AdminPortal: React.FC = () => {
             </form>
 
             <div className="space-y-2 pt-4 border-t border-slate-200 dark:border-white/5">
-              <span className="text-[10px] font-bold text-slate-650 dark:text-slate-500 uppercase">Subjects Registered</span>
+              <span className="text-[10px] font-bold text-slate-600 dark:text-slate-500 uppercase">Subjects Registered</span>
               {!activeClass || activeClass.subjects.length === 0 ? (
-                <p className="text-xs text-slate-650 dark:text-slate-500 text-center py-4">No subjects registered in this grade.</p>
+                <p className="text-xs text-slate-600 dark:text-slate-500 text-center py-4">No subjects registered in this grade.</p>
               ) : (
                 <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
                   {activeClass.subjects.map(sub => (
@@ -297,7 +297,7 @@ export const AdminPortal: React.FC = () => {
               return (
                 <div key={idx} className="glass-card p-5 border-slate-200 dark:border-white/5 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] text-slate-655 dark:text-slate-500 font-bold uppercase tracking-wider block">{stat.label}</span>
+                    <span className="text-[10px] text-slate-600 dark:text-slate-500 font-bold uppercase tracking-wider block">{stat.label}</span>
                     <span className="text-lg font-extrabold text-slate-900 dark:text-white mt-1 block">{stat.value}</span>
                   </div>
                   <div className={`w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/5 flex items-center justify-center ${stat.color}`}>
@@ -315,7 +315,7 @@ export const AdminPortal: React.FC = () => {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h4 className="text-base font-bold text-slate-900 dark:text-white">Monthly Active Registrations</h4>
-                  <p className="text-xs text-slate-650 dark:text-slate-500">Platform subscription scaling after Class 10/12 exams launch.</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-500">Platform subscription scaling after Class 10/12 exams launch.</p>
                 </div>
                 <div className="text-[10px] font-bold text-brand-violet dark:text-brand-violet-light bg-violet-500/10 px-2 py-0.5 rounded border border-brand-violet/20">
                   +12.4% QoQ Growth
@@ -351,7 +351,7 @@ export const AdminPortal: React.FC = () => {
                 </div>
 
                 {/* Bottom months labels */}
-                <div className="w-full flex justify-between text-[9px] text-slate-650 dark:text-slate-500 font-bold px-1 mb-[-20px] relative z-10">
+                <div className="w-full flex justify-between text-[9px] text-slate-600 dark:text-slate-500 font-bold px-1 mb-[-20px] relative z-10">
                   <span>Jan</span>
                   <span>Feb</span>
                   <span>Mar</span>
